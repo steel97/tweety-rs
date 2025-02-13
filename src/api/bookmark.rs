@@ -109,7 +109,7 @@ pub enum UserFields {
 #[derive(Debug, Serialize, Deserialize)]
 pub struct BookmarkParams {
     pub expansions: Option<Vec<Expansions>>,
-    pub max_results: Option<u32>, // Use u32 for integer parameters
+    pub max_results: Option<u32>,
     pub media_fields: Option<Vec<MediaFields>>,
     pub pagination_token: Option<String>,
     pub place_fields: Option<Vec<PlaceFields>>,

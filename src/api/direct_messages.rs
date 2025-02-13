@@ -202,7 +202,6 @@ impl TweetyClient {
     // OAuth 2.0 Authorization Code with PKCE
     pub async fn get_direct_messages(&self, params: QueryParams) -> Result<Value, TweetyError> {
         let url = format!("https://api.x.com/2/dm_events?{}", params.to_query_string());
-        println!("Url: {}", url);
         self.send_request::<()>(&url, Method::GET, None).await
     }
     /// GET /2/dm_conversations/with/:participant_id/dm_events

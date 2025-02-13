@@ -103,7 +103,7 @@ impl TweetyClient {
         }
     }
     /// UPDATE/EDIT TWEET
-    pub async fn edit_tweet(self, message: &str, media_id: &str) -> Result<Value, TweetyError> {
+    pub async fn edit_tweet(self, message: &str, media_id: &str) -> Result<Value, TweetyError> { 
         let base_url = format!("https://api.twitter.com/2/tweets/{}", media_id);
 
         let body = serde_json::json!({

@@ -1,5 +1,5 @@
 use crate::api::error::TweetyError;
-use reqwest::Method;
+use reqwest::{Client, Method};
 use reqwest_oauth1::{self, OAuthClientProvider};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -67,9 +67,8 @@ impl TweetyClient {
         };
 
         let parsed_url = match Url::parse(url) {
-            Ok(url) => url,
+            Ok(url) => url.to_string(),
             Err(err) => {
-                println!("{}", err);
                 return Err(TweetyError::UrlParseError(err));
             }
         };
@@ -77,32 +76,24 @@ impl TweetyClient {
         let secrets = reqwest_oauth1::Secrets::new(&self.consumer_key, &self.consumer_key_secret)
             .token(&self.access_token, &self.access_token_secret);
 
-        let client = reqwest::Client::new();
+        let client = Client::new();
         let mut json_body = String::new();
 
         if body.is_some() {
             json_body = serde_json::to_string(&body).unwrap();
         }
 
-        let response = if method == "POST" {
-            client
+        let response = match method {
+            Method::POST => client
                 .oauth1(secrets)
-                .post(&parsed_url.to_string())
+                .post(&parsed_url)
                 .header("Content-Type", "application/json")
                 .body(json_body)
-                .send()
-        } else if method == "GET" {
-            client.oauth1(secrets).get(&parsed_url.to_string()).send()
-        } else if method == "DELETE" {
-            client
-                .oauth1(secrets)
-                .delete(&parsed_url.to_string())
-                .send()
-        } else if method == "PUT" {
-            client.oauth1(secrets).put(&parsed_url.to_string()).send()
-        } else {
-            //TODO : a good way to handle this without panicking
-            panic!("Invalid method");
+                .send(),
+            Method::GET => client.oauth1(secrets).get(&parsed_url).send(),
+            Method::DELETE => client.oauth1(secrets).delete(&parsed_url).send(),
+            Method::PUT => client.oauth1(secrets).put(&parsed_url).send(),
+            _ => panic!("Method not allowed"),
         };
 
         match response.await {
@@ -127,10 +118,7 @@ impl TweetyClient {
                     status, status_text
                 )))
             }
-            Err(err) => {
-                println!("Error while sending request: {}", err);
-                Err(TweetyError::NetworkError(err.to_string()))
-            }
+            Err(err) => Err(TweetyError::NetworkError(err.to_string())),
         }
     }
 }

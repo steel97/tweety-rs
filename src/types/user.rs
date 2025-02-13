@@ -31,7 +31,7 @@ pub struct UserResponse {
     pub url: Option<String>,
     pub description: Option<String>,
     pub verified: Option<bool>,
-    pub verified_type: Option<VerifiedType>, // Enum could be used here
+    pub verified_type: Option<VerifiedType>,
     pub entities: Option<Entities>,
     pub profile_image_url: Option<String>,
     pub public_metrics: Option<PublicMetrics>,
@@ -50,7 +50,7 @@ pub enum VerifiedType {
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Withheld {
     pub country_codes: Option<Vec<String>>,
-    pub scope: Option<WithheldScope>, // Enum could be used here
+    pub scope: Option<WithheldScope>,
 }
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]

@@ -13,7 +13,7 @@ pub struct Media {
 impl TweetyClient {
     /// Create a media from a file<br/>
     /// Will fail if `consumer_key`, `consumer_secret`, `access_token` and `access_token_secret` are not set
-    /// Will take a path as a parameter and return the media id of the uploadeded file is sucess and TweetyError incase of failure
+    /// Will take a path as a parameter and return the media id of the uploaded file is sucess and TweetyError incase of failure
     pub async fn upload_file(&self, path: &Path) -> Result<u64, TweetyError> {
         if !self.is_initialized() {
             return Err(TweetyError::MissingCredentials);
@@ -22,7 +22,6 @@ impl TweetyClient {
         let mut file = match File::open(path) {
             Ok(value) => value,
             Err(err) => {
-                println!("Error opening file: {:?}", err);
                 return Err(TweetyError::FileIOError(err.to_string()));
             }
         };

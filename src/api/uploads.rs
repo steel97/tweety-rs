@@ -40,7 +40,7 @@ impl TweetyClient {
 
         let response = client
             .oauth1(secrets)
-            .post("https://upload.twitter.com/1.1/media/upload.json")
+            .post("https://api.x.com/2/media/upload")
             .multipart(form)
             .send()
             .await;

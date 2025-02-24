@@ -1,8 +1,8 @@
 use crate::api::client::TweetyClient;
 use crate::api::error::TweetyError;
+use crate::types::types::ResponseWithHeaders;
 use reqwest::Method;
 use serde::{Deserialize, Serialize};
-use serde_json::Value;
 use serde_qs::to_string as query_string;
 
 #[derive(Debug, Serialize, Deserialize, Default)]
@@ -316,7 +316,7 @@ impl TweetyClient {
         &self,
         query: &str,
         query_params: Option<QueryParams>,
-    ) -> Result<RecentSearchResponse, TweetyError> {
+    ) -> Result<ResponseWithHeaders, TweetyError> {
         let mut base_url = format!("https://api.x.com/2/tweets/search/recent?query={}", query);
 
         if let Some(value) = query_params {
@@ -324,15 +324,7 @@ impl TweetyClient {
         }
 
         match self.send_request::<()>(&base_url, Method::GET, None).await {
-            Ok(value) => {
-                let json_data = serde_json::from_value::<RecentSearchResponse>(value);
-
-                if let Ok(data) = json_data {
-                    Ok(data)
-                } else {
-                    Err(TweetyError::JsonParseError("Invalid JSON".to_string()))
-                }
-            }
+            Ok(value) => Ok(value),
             Err(err) => Err(TweetyError::ApiError(err.to_string())),
         }
     }
@@ -345,7 +337,7 @@ impl TweetyClient {
         &self,
         query: &str,
         query_params: Option<QueryParams>,
-    ) -> Result<Value, TweetyError> {
+    ) -> Result<ResponseWithHeaders, TweetyError> {
         let mut base_url = format!("https://api.x.com/2/tweets/search/all?query={}", query);
 
         if let Some(queries) = query_params {

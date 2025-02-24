@@ -8,10 +8,10 @@
 
 use crate::api::client::TweetyClient;
 use crate::api::error::TweetyError;
+use crate::types::types::ResponseWithHeaders;
 use crate::types::user::UserResponse;
 use reqwest::Method;
 use serde::{Deserialize, Serialize};
-use serde_json::Value;
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct UserInfo {
@@ -157,7 +157,7 @@ impl TweetyClient {
         &self,
         user_id: &str,
         params: Option<UserQueryParams>,
-    ) -> Result<Value, TweetyError> {
+    ) -> Result<ResponseWithHeaders, TweetyError> {
         let query_string = if let Some(params) = params {
             params.construct_query_string()
         } else {
@@ -174,7 +174,7 @@ impl TweetyClient {
         &self,
         ids: Vec<String>,
         params: Option<UserQueryParams>,
-    ) -> Result<Value, TweetyError> {
+    ) -> Result<ResponseWithHeaders, TweetyError> {
         let ids_string = ids.join(",");
         let query_string = if let Some(params) = params {
             params.construct_query_string()
@@ -191,7 +191,10 @@ impl TweetyClient {
     ///  Returns a variety of information about one or more users specified by their usernames.
     ///  Required 	string	A comma separated list of user IDs. Up to 100 are allowed in a single request.
     /// Make sure to not include a space between commas and fields.
-    pub async fn get_users_by_username(&self, username: &[&str]) -> Result<Value, TweetyError> {
+    pub async fn get_users_by_username(
+        &self,
+        username: &[&str],
+    ) -> Result<ResponseWithHeaders, TweetyError> {
         let url = format!(
             "https://api.x.com/2/users/by/username/{}",
             username.join(",")
@@ -207,7 +210,7 @@ impl TweetyClient {
         &self,
         user_names: &[&str],
         params: Option<UserQueryParams>,
-    ) -> Result<Value, TweetyError> {
+    ) -> Result<ResponseWithHeaders, TweetyError> {
         let query_string = if let Some(params) = params {
             params.construct_query_string()
         } else {
@@ -224,7 +227,10 @@ impl TweetyClient {
     }
     /// Returns information about an authorized user.
     /// <https://developer.x.com/en/docs/x-api/users/lookup/api-reference/get-users-me#>
-    pub async fn get_user_me(&self, params: Option<UserQueryParams>) -> Result<Value, TweetyError> {
+    pub async fn get_user_me(
+        &self,
+        params: Option<UserQueryParams>,
+    ) -> Result<ResponseWithHeaders, TweetyError> {
         let query_string = if let Some(params) = params {
             params.construct_query_string()
         } else {

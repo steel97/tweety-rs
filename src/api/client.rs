@@ -1,4 +1,7 @@
+use std::collections::HashMap;
+
 use crate::api::error::TweetyError;
+use crate::types::types::ResponseWithHeaders;
 use reqwest::{Client, Method};
 use reqwest_oauth1::{self, OAuthClientProvider};
 use serde::{Deserialize, Serialize};
@@ -58,7 +61,7 @@ impl TweetyClient {
         url: &str,
         method: Method,
         body: Option<T>,
-    ) -> Result<Value, TweetyError>
+    ) -> Result<ResponseWithHeaders, TweetyError>
     where
         T: Serialize + Deserialize<'static>,
     {
@@ -98,13 +101,26 @@ impl TweetyClient {
 
         match response.await {
             Ok(response) => {
+                let headers = response
+                    .headers()
+                    .clone()
+                    .iter()
+                    .map(|(k, v)| (k.as_str().to_string(), v.to_str().unwrap().to_string()))
+                    .collect::<HashMap<String, String>>();
+
                 if response.status().is_success() {
                     let api_response = response
                         .json::<Value>()
                         .await
                         .map_err(|err| TweetyError::JsonParseError(err.to_string()))?;
 
-                    return Ok(api_response);
+                    // Returning of headers is related to this issue: https://github.com/dxphilo/tweety-rs/issues/2
+                    let res = ResponseWithHeaders {
+                        response: api_response,
+                        headers,
+                    };
+
+                    return Ok(res);
                 }
                 let status = response.status();
 
@@ -114,8 +130,8 @@ impl TweetyClient {
                     .map_err(|err| TweetyError::JsonParseError(err.to_string()))?;
 
                 Err(TweetyError::ApiError(format!(
-                    "HTTP {}: {}",
-                    status, status_text
+                    "HTTP {}: Status Text: {}: Headers: {:?}",
+                    status, status_text, headers
                 )))
             }
             Err(err) => Err(TweetyError::NetworkError(err.to_string())),

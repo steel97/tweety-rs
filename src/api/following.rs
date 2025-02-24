@@ -1,6 +1,6 @@
 use super::user::UserQueryParams;
-use crate::api::client::TweetyClient;
 use crate::api::error::TweetyError;
+use crate::{api::client::TweetyClient, types::types::ResponseWithHeaders};
 use reqwest::Method;
 use serde::{Deserialize, Serialize};
 
@@ -92,7 +92,7 @@ impl TweetyClient {
         &self,
         user_id: &str,
         target_user_id: &str,
-    ) -> Result<FollowResponse, TweetyError> {
+    ) -> Result<ResponseWithHeaders, TweetyError> {
         let url = format!("https://api.x.com/2/users/:{}/following", user_id);
 
         let json_body = FollowBody {
@@ -100,10 +100,7 @@ impl TweetyClient {
         };
 
         match self.send_request(&url, Method::POST, Some(json_body)).await {
-            Ok(value) => match serde_json::from_value::<FollowResponse>(value) {
-                Ok(data) => Ok(data),
-                Err(err) => Err(TweetyError::JsonParseError(err.to_string())),
-            },
+            Ok(value) => Ok(value),
             Err(err) => Err(TweetyError::ApiError(err.to_string())),
         }
     }
@@ -115,17 +112,14 @@ impl TweetyClient {
         &self,
         source_userid: &str,
         target_userid: &str,
-    ) -> Result<UnfollowResponse, TweetyError> {
+    ) -> Result<ResponseWithHeaders, TweetyError> {
         let url = format!(
             "https://api.x.com/2/users/:{}/following/:{}",
             source_userid, target_userid
         );
 
         match self.send_request::<()>(&url, Method::DELETE, None).await {
-            Ok(value) => match serde_json::from_value::<UnfollowResponse>(value) {
-                Ok(data) => Ok(data),
-                Err(err) => Err(TweetyError::JsonParseError(err.to_string())),
-            },
+            Ok(value) => Ok(value),
             Err(err) => Err(TweetyError::ApiError(err.to_string())),
         }
     }
@@ -136,7 +130,7 @@ impl TweetyClient {
         &self,
         user_id: &str,
         query: Option<UserQueryParams>,
-    ) -> Result<UserFollowingResponse, TweetyError> {
+    ) -> Result<ResponseWithHeaders, TweetyError> {
         let mut base_url = format!("https://api.x.com/2/users/{}/following", user_id);
 
         if let Some(query) = query {
@@ -145,10 +139,7 @@ impl TweetyClient {
         }
 
         match self.send_request::<()>(&base_url, Method::GET, None).await {
-            Ok(value) => match serde_json::from_value::<UserFollowingResponse>(value) {
-                Ok(data) => Ok(data),
-                Err(err) => Err(TweetyError::JsonParseError(err.to_string())),
-            },
+            Ok(value) => Ok(value),
             Err(err) => Err(TweetyError::ApiError(err.to_string())),
         }
     }

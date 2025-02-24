@@ -186,6 +186,19 @@ async fn main() -> Result<(), TweetyError> {
 }
 ```
 
+# ⚠️ Responses
+
+We return the response together with the headers if that might be important to you. The structure is as show in the struct below:
+
+```rust
+    #[derive(Debug, Serialize, Deserialize)]
+    pub struct ResponseWithHeaders {
+        pub response: Value,
+        pub headers: HashMap<String, String>,
+    }
+```
+
+
 # ⚠️ Twitter API Rate Limits
 
 Twitter has a small window cap for the free tier, so it's important to be aware of the rate limits.

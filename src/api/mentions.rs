@@ -1,5 +1,5 @@
-use crate::api::client::TweetyClient;
 use crate::api::error::TweetyError;
+use crate::{api::client::TweetyClient, types::types::ResponseWithHeaders};
 use reqwest::Method;
 use serde::{Deserialize, Serialize};
 use serde_qs::to_string as convert_query_to_string;
@@ -240,17 +240,14 @@ impl TweetyClient {
         &self,
         user_id: &str,
         query_params: Option<QueryParams>,
-    ) -> Result<MentionsResponse, TweetyError> {
+    ) -> Result<ResponseWithHeaders, TweetyError> {
         let mut base_url = format!("https://api.x.com/2/users/{}/mentions", user_id);
         if let Some(queries) = query_params {
             let query_params = convert_query_to_string(&queries).unwrap();
             base_url = format!("{}?{}", base_url, query_params);
         }
         match self.send_request::<()>(&base_url, Method::GET, None).await {
-            Ok(value) => match serde_json::from_value::<MentionsResponse>(value) {
-                Ok(data) => Ok(data),
-                Err(err) => Err(TweetyError::JsonParseError(err.to_string())),
-            },
+            Ok(value) => Ok(value),
             Err(err) => Err(TweetyError::ApiError(err.to_string())),
         }
     }

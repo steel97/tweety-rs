@@ -1,9 +1,9 @@
 use crate::api::client::TweetyClient;
 use crate::api::error::TweetyError;
 use crate::types::tweet::PostTweetParams;
+use crate::types::types::ResponseWithHeaders;
 use reqwest::Method;
 use serde::{Deserialize, Serialize};
-use serde_json::Value;
 use std::fmt;
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -60,7 +60,7 @@ impl TweetyClient {
     /// GET /2/tweets
     /// Returns a variety of information about the Tweet specified by the requested ID or list of IDs.
     /// [Docs](https://developer.x.com/en/docs/x-api/tweets/lookup/api-reference/get-tweets)
-    pub async fn get_tweet(&self, tweet_id: Ids) -> Result<Value, TweetyError> {
+    pub async fn get_tweet(&self, tweet_id: Ids) -> Result<ResponseWithHeaders, TweetyError> {
         let base_url = format!("https://api.x.com/2/tweets/?ids={}", tweet_id);
 
         self.send_request::<()>(&base_url, Method::GET, None).await
@@ -68,7 +68,7 @@ impl TweetyClient {
     /// GET /2/tweets/:id
     /// Returns a variety of information about a single Tweet specified by the requested ID.
     /// [Docs](https://developer.x.com/en/docs/x-api/tweets/lookup/api-reference/get-tweets-id)
-    pub async fn get_tweet_info(&self, tweet_id: &str) -> Result<Value, TweetyError> {
+    pub async fn get_tweet_info(&self, tweet_id: &str) -> Result<ResponseWithHeaders, TweetyError> {
         let base_url = format!("https://api.x.com/2/tweets/{}", tweet_id);
 
         self.send_request::<()>(&base_url, Method::GET, None).await
@@ -81,7 +81,7 @@ impl TweetyClient {
         &self,
         message: &str,
         body_params: Option<PostTweetParams>,
-    ) -> Result<PostTweetResponseData, TweetyError> {
+    ) -> Result<ResponseWithHeaders, TweetyError> {
         let base_url = "https://api.twitter.com/2/tweets";
 
         let json_body = if let Some(body) = body_params {
@@ -95,15 +95,16 @@ impl TweetyClient {
             .send_request(base_url, Method::POST, Some(json_body))
             .await
         {
-            Ok(value) => match serde_json::from_value::<PostTweetResponseData>(value) {
-                Ok(res) => Ok(res),
-                Err(e) => Err(TweetyError::JsonParseError(e.to_string())),
-            },
+            Ok(value) => Ok(value),
             Err(err) => Err(TweetyError::ApiError(err.to_string())),
         }
     }
     /// UPDATE/EDIT TWEET
-    pub async fn edit_tweet(self, message: &str, media_id: &str) -> Result<Value, TweetyError> { 
+    pub async fn edit_tweet(
+        self,
+        message: &str,
+        media_id: &str,
+    ) -> Result<ResponseWithHeaders, TweetyError> {
         let base_url = format!("https://api.twitter.com/2/tweets/{}", media_id);
 
         let body = serde_json::json!({
@@ -117,14 +118,11 @@ impl TweetyClient {
     /// DELETE TWEET
     /// Path parameter, pass The Tweet ID you are deleting.
     /// [Delete Docs](https://developer.x.com/en/docs/x-api/tweets/manage-tweets/api-reference/delete-tweets-id)
-    pub async fn delete_tweet(&self, tweet_id: &str) -> Result<DeleteResponse, TweetyError> {
+    pub async fn delete_tweet(&self, tweet_id: &str) -> Result<ResponseWithHeaders, TweetyError> {
         let url = format!("https://api.x.com/2/tweets/{}", tweet_id);
 
         match self.send_request::<()>(&url, Method::DELETE, None).await {
-            Ok(value) => match serde_json::from_value::<DeleteResponse>(value) {
-                Ok(res) => Ok(res),
-                Err(err) => Err(TweetyError::JsonParseError(err.to_string())),
-            },
+            Ok(value) => Ok(value),
             Err(err) => Err(err),
         }
     }

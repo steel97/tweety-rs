@@ -1,8 +1,7 @@
 use super::error::TweetyError;
-use crate::TweetyClient;
+use crate::{types::types::ResponseWithHeaders, TweetyClient};
 use reqwest::Method;
 use serde::{Deserialize, Serialize};
-use serde_json::Value;
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
@@ -200,7 +199,10 @@ impl TweetyClient {
     /// Supports retrieving events from the previous 30 days.
     /// Authentication methods supported by this endpoint
     // OAuth 2.0 Authorization Code with PKCE
-    pub async fn get_direct_messages(&self, params: QueryParams) -> Result<Value, TweetyError> {
+    pub async fn get_direct_messages(
+        &self,
+        params: QueryParams,
+    ) -> Result<ResponseWithHeaders, TweetyError> {
         let url = format!("https://api.x.com/2/dm_events?{}", params.to_query_string());
         self.send_request::<()>(&url, Method::GET, None).await
     }
@@ -212,7 +214,7 @@ impl TweetyClient {
         &self,
         participant_id: &str,
         params: QueryParams,
-    ) -> Result<Value, TweetyError> {
+    ) -> Result<ResponseWithHeaders, TweetyError> {
         let url = format!(
             "https://api.x.com/2/dm_conversations/with/{}/dm_events?{}",
             participant_id,
@@ -227,7 +229,7 @@ impl TweetyClient {
         &self,
         dm_conversation_id: &str,
         params: QueryParams,
-    ) -> Result<Value, TweetyError> {
+    ) -> Result<ResponseWithHeaders, TweetyError> {
         let url = format!(
             "https://api.x.com/2/dm_conversations/{}/dm_events?{}",
             dm_conversation_id,

@@ -1,8 +1,8 @@
 use crate::api::client::TweetyClient;
 use crate::api::error::TweetyError;
+use crate::types::types::ResponseWithHeaders;
 use reqwest::Method;
 use serde::{Deserialize, Serialize};
-use serde_json::Value;
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
@@ -126,13 +126,16 @@ pub struct BookmarkParams {
 impl TweetyClient {
     /// Bookmarks lookup
     /// Lookup a user's Bookmarks
-    pub async fn get_user_bookmark(self, user_id: &str) -> Result<Value, TweetyError> {
+    pub async fn get_user_bookmark(
+        self,
+        user_id: &str,
+    ) -> Result<ResponseWithHeaders, TweetyError> {
         let url = format!("https://api.x.com/2/users/{}/bookmarks", user_id);
 
         self.send_request::<()>(&url, Method::GET, None).await
     }
     /// Bookmark a Post
-    pub async fn bookmark_post(self, post_id: &str) -> Result<Value, TweetyError> {
+    pub async fn bookmark_post(self, post_id: &str) -> Result<ResponseWithHeaders, TweetyError> {
         let url = format!("https://api.x.com/2/users/{}/bookmarks", post_id);
 
         self.send_request::<()>(&url, Method::POST, None).await
@@ -142,7 +145,7 @@ impl TweetyClient {
         self,
         user_id: &str,
         tweet_id: &str,
-    ) -> Result<Value, TweetyError> {
+    ) -> Result<ResponseWithHeaders, TweetyError> {
         let url = format!(
             "https://api.x.com/2/users/{}/bookmarks/{}",
             user_id, tweet_id

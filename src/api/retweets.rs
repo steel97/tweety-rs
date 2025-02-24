@@ -1,7 +1,7 @@
 use crate::api::client::TweetyClient;
 use crate::api::error::TweetyError;
+use crate::types::types::ResponseWithHeaders;
 use reqwest::Method;
-use serde_json::Value;
 
 /// Check required params
 /// [Docs](https://developer.x.com/en/docs/x-api/tweets/retweets/api-reference/get-tweets-id-retweets#tab0)
@@ -57,12 +57,15 @@ impl RetweetQueryParams {
 
 impl TweetyClient {
     /// Users who have Retweeted a Post
-    pub async fn fetch_retweeters(self, tweet_id: &str) -> Result<Value, TweetyError> {
+    pub async fn fetch_retweeters(
+        self,
+        tweet_id: &str,
+    ) -> Result<ResponseWithHeaders, TweetyError> {
         let url = format!("https://api.x.com/2/tweets/{}/retweeted_by", tweet_id);
         self.send_request::<()>(&url, Method::GET, None).await
     }
     /// Causes the user ID identified in the path parameter to Retweet the target Tweet.
-    pub async fn retweet(&self, tweet_id: &str) -> Result<Value, TweetyError> {
+    pub async fn retweet(&self, tweet_id: &str) -> Result<ResponseWithHeaders, TweetyError> {
         let url = format!("https://api.x.com/2/users/{}/retweets", tweet_id);
         self.send_request::<()>(&url, Method::POST, None).await
     }
@@ -74,7 +77,7 @@ impl TweetyClient {
         &self,
         user_id: &str,
         source_tweet_id: &str,
-    ) -> Result<Value, TweetyError> {
+    ) -> Result<ResponseWithHeaders, TweetyError> {
         let url = format!(
             "https://api.x.com/2/users/{}/retweets/{}",
             user_id, source_tweet_id
@@ -89,7 +92,7 @@ impl TweetyClient {
         self,
         user_id: &str,
         params: Option<RetweetQueryParams>,
-    ) -> Result<Value, TweetyError> {
+    ) -> Result<ResponseWithHeaders, TweetyError> {
         let mut url = format!("https://api.x.com/2/tweets/{}/retweets", user_id);
 
         if let Some(query_params) = params {

@@ -1,4 +1,7 @@
+use std::collections::HashMap;
+
 use serde::{Deserialize, Serialize};
+use serde_json::Value;
 
 /// Struct provided by TwitterBot methods
 #[derive(Debug, Serialize, Deserialize)]
@@ -116,4 +119,10 @@ pub struct TweetInfo {
 #[derive(Debug, Serialize, Deserialize)]
 pub struct TweetResponse {
     pub data: TweetInfo,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct ResponseWithHeaders {
+    pub response: Value,
+    pub headers: HashMap<String, String>,
 }

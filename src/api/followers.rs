@@ -1,5 +1,5 @@
 use super::{error::TweetyError, user::UserQueryParams};
-use crate::api::client::TweetyClient;
+use crate::{api::client::TweetyClient, types::types::ResponseWithHeaders};
 use reqwest::Method;
 use serde::{Deserialize, Serialize};
 
@@ -29,7 +29,7 @@ impl TweetyClient {
         &self,
         user_id: &str,
         params: Option<UserQueryParams>,
-    ) -> Result<UserFollowersResponse, TweetyError> {
+    ) -> Result<ResponseWithHeaders, TweetyError> {
         let mut url = format!("https://api.x.com/2/users/{}/followers?", user_id);
 
         if let Some(param_str) = params {
@@ -37,10 +37,7 @@ impl TweetyClient {
             url.push_str(&query_string);
         }
         match self.send_request::<()>(&url, Method::GET, None).await {
-            Ok(value) => match serde_json::from_value::<UserFollowersResponse>(value) {
-                Ok(data) => Ok(data),
-                Err(err) => Err(TweetyError::JsonParseError(err.to_string())),
-            },
+            Ok(value) => Ok(value),
             Err(err) => Err(TweetyError::ApiError(err.to_string())),
         }
     }

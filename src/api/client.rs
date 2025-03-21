@@ -14,6 +14,9 @@ pub struct TweetyClient {
     pub(crate) access_token: String,
     pub(crate) consumer_key_secret: String,
     pub(crate) access_token_secret: String,
+    pub(crate) proxy_addr: String,
+    pub(crate) proxy_username: String,
+    pub(crate) proxy_password: String,
 }
 
 impl TweetyClient {
@@ -42,12 +45,18 @@ impl TweetyClient {
         access_token: &str,
         consumer_key_secret: &str,
         access_token_secret: &str,
+        proxy_addr: &str,
+        proxy_username: &str,
+        proxy_password: &str,
     ) -> Self {
         TweetyClient {
             consumer_key: consumer_key.to_string(),
             access_token: access_token.to_string(),
             consumer_key_secret: consumer_key_secret.to_string(),
             access_token_secret: access_token_secret.to_string(),
+            proxy_addr: proxy_addr.to_string(),
+            proxy_username: proxy_username.to_string(),
+            proxy_password: proxy_password.to_string(),
         }
     }
     pub fn is_initialized(&self) -> bool {
@@ -79,7 +88,17 @@ impl TweetyClient {
         let secrets = reqwest_oauth1::Secrets::new(&self.consumer_key, &self.consumer_key_secret)
             .token(&self.access_token, &self.access_token_secret);
 
-        let client = Client::new();
+        let client = if self.proxy_addr.is_empty() {
+            Client::new()
+        } else {
+            reqwest::Client::builder()
+                .proxy(
+                    reqwest::Proxy::all(self.proxy_addr.clone())?
+                        .basic_auth(&self.proxy_username, &self.proxy_password),
+                )
+                .build()?
+        };
+
         let mut json_body = String::new();
 
         if body.is_some() {
